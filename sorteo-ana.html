@@ -4,7 +4,6 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sorteo de Instagram</title>
-  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
   <style>
     :root {
       --ig-gradient: linear-gradient(45deg, #405DE6, #5851DB, #833AB4, #C13584, #E1306C, #FD1D1D, #F56040, #F77737, #FCAF45, #FFDC80);
@@ -16,13 +15,6 @@
       --text: #262626;
       --muted: #8e8e8e;
       --border: #dbdbdb;
-      --code-bg: #1e1e2e;
-      --code-text: #cdd6f4;
-      --code-keyword: #cba6f7;
-      --code-string: #a6e3a1;
-      --code-comment: #6c7086;
-      --code-tag: #89b4fa;
-      --code-attr: #f9e2af;
     }
 
     * { box-sizing: border-box; }
@@ -36,11 +28,10 @@
       display: flex;
       flex-direction: column;
       align-items: center;
+      justify-content: center;
       min-height: 100vh;
-      overflow-x: hidden;
     }
 
-    /* -------- Tarjeta principal del sorteo -------- */
     .container {
       background: var(--card);
       padding: 40px;
@@ -48,273 +39,196 @@
       box-shadow: 0 8px 24px rgba(0,0,0,0.08);
       text-align: center;
       width: 100%;
-      max-width: 600px;
-      position: relative;
-      z-index: 10;
+      max-width: 500px;
       border-top: 4px solid transparent;
       border-image: var(--ig-gradient) 1;
     }
 
-    h1, h2 {
-      margin-top: 0;
-      font-weight: 700;
-      letter-spacing: -0.5px;
-    }
-
     h1 {
       font-size: 26px;
+      margin-top: 0;
+      margin-bottom: 8px;
       background: var(--ig-gradient);
       -webkit-background-clip: text;
       background-clip: text;
       -webkit-text-fill-color: transparent;
     }
 
-    h2 { font-size: 22px; color: var(--text); }
+    p.subtitle {
+      color: var(--muted);
+      font-size: 14px;
+      margin-bottom: 28px;
+      line-height: 1.5;
+    }
 
-    p { color: var(--muted); line-height: 1.5; }
+    label {
+      display: block;
+      text-align: left;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
 
-    textarea {
+    input[type="url"] {
       width: 100%;
-      height: 150px;
-      padding: 14px;
+      padding: 14px 16px;
       border: 1.5px solid var(--border);
       border-radius: 10px;
-      margin-bottom: 20px;
-      resize: vertical;
-      font-family: 'Segoe UI', Tahoma, sans-serif;
       font-size: 15px;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
       color: var(--text);
       transition: border-color 0.2s, box-shadow 0.2s;
     }
 
-    textarea:focus {
+    input[type="url"]:focus {
       outline: none;
       border-color: var(--ig-pink);
       box-shadow: 0 0 0 3px rgba(225, 48, 108, 0.15);
     }
 
     button {
+      width: 100%;
       background: var(--ig-blue);
       color: white;
       border: none;
-      padding: 12px 28px;
+      padding: 14px;
       font-size: 16px;
       font-weight: 600;
       border-radius: 10px;
       cursor: pointer;
+      margin-top: 20px;
       transition: background-color 0.2s, transform 0.1s;
     }
 
     button:hover { background: var(--ig-blue-hover); }
     button:active { transform: scale(0.98); }
 
-    button.secondary {
-      background: var(--border);
+    /* ====== Segunda sección (placeholder) ====== */
+    #step-2 {
+      display: none;
+      width: 100%;
+      max-width: 500px;
+      text-align: center;
+    }
+
+    .placeholder-card {
+      background: var(--card);
+      padding: 50px 30px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      border-top: 4px solid transparent;
+      border-image: var(--ig-gradient) 1;
+    }
+
+    .placeholder-card h2 {
+      margin-top: 0;
       color: var(--text);
     }
-    button.secondary:hover { background: #c7c7c7; }
 
-    /* -------- Loader -------- */
-    .loader {
-      border: 6px solid #f3f3f3;
-      border-top: 6px solid var(--ig-pink);
-      border-radius: 50%;
-      width: 60px;
-      height: 60px;
-      animation: spin 1s linear infinite;
-      margin: 20px auto;
-      display: none;
-    }
-
-    @keyframes spin {
-      0%   { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-
-    #loading-text {
-      display: none;
-      font-size: 16px;
-      margin-top: 15px;
-      color: var(--muted);
-    }
-
-    /* -------- Resultados -------- */
-    #winners-section { display: none; }
-
-    .winner-name {
-      font-size: 22px;
-      font-weight: 700;
-      color: var(--ig-pink);
-      margin: 12px 0;
-      padding: 16px;
+    .placeholder-card .link-preview {
+      display: inline-block;
+      margin-top: 10px;
+      padding: 8px 14px;
       background: #fff0f5;
-      border-radius: 10px;
-      border-left: 4px solid var(--ig-pink);
-      animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-      opacity: 0;
-      transform: scale(0.8);
-    }
-
-    @keyframes popIn {
-      to { opacity: 1; transform: scale(1); }
-    }
-
-    /* -------- Bloque para mostrar el código -------- */
-    .code-wrapper {
-      margin-top: 40px;
-      width: 100%;
-      max-width: 900px;
-      background: var(--code-bg);
-      border-radius: 14px;
-      overflow: hidden;
-      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
-      font-family: 'Fira Code', 'Consolas', 'Menlo', monospace;
-    }
-
-    .code-header {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      padding: 12px 18px;
-      background: #181825;
-      border-bottom: 1px solid #313244;
-    }
-
-    .dot {
-      width: 12px; height: 12px; border-radius: 50%;
-    }
-    .dot.red    { background: #ff5f56; }
-    .dot.yellow { background: #ffbd2e; }
-    .dot.green  { background: #27c93f; }
-
-    .code-title {
-      margin-left: 12px;
-      color: #a6adc8;
+      color: var(--ig-pink);
       font-size: 13px;
-      font-family: 'Segoe UI', sans-serif;
+      border-radius: 8px;
+      word-break: break-all;
+      border-left: 3px solid var(--ig-pink);
     }
 
-    pre {
-      margin: 0;
-      padding: 20px 24px;
-      overflow-x: auto;
-      color: var(--code-text);
-      font-size: 13.5px;
+    .placeholder-card .info {
+      margin-top: 24px;
+      color: var(--muted);
+      font-size: 14px;
       line-height: 1.6;
-      tab-size: 2;
     }
 
-    /* Resaltado de sintaxis básico */
-    .kw  { color: var(--code-keyword); }
-    .str { color: var(--code-string); }
-    .cm  { color: var(--code-comment); font-style: italic; }
-    .tag { color: var(--code-tag); }
-    .attr{ color: var(--code-attr); }
-    .num { color: #fab387; }
-
-    @media (max-width: 600px) {
-      .container { padding: 25px; }
-      pre { font-size: 12px; padding: 16px; }
+    .back-btn {
+      background: var(--border);
+      color: var(--text);
+      width: auto;
+      padding: 10px 20px;
+      font-size: 14px;
+      margin-top: 24px;
     }
+    .back-btn:hover { background: #c7c7c7; }
   </style>
 </head>
 <body>
 
-  <!-- ============ SORTEO ============ -->
-  <div class="container" id="main-container">
-    <div id="setup-section">
-      <h1>Sorteo de Instagram</h1>
-      <p>Pega aquí la lista de usuarios (uno por línea):</p>
-      <textarea id="participants" placeholder="@usuario1&#10;@usuario2&#10;@usuario3"></textarea>
-      <br>
-      <button onclick="startDraw()">Elegir 3 Ganadores</button>
-    </div>
+  <!-- ============ PASO 1: Enlace de la publicación ============ -->
+  <div class="container" id="step-1">
+    <h1>Sorteo de Instagram</h1>
+    <p class="subtitle">Pega el enlace de la publicación del sorteo para comenzar.</p>
 
-    <div class="loader" id="loader"></div>
-    <p id="loading-text">Verificando participaciones y mezclando... ¡Mucha suerte!</p>
+    <label for="ig-post">Enlace de la publicación</label>
+    <input
+      type="url"
+      id="ig-post"
+      placeholder="https://www.instagram.com/p/XXXXXXXXX/"
+      autofocus
+    >
 
-    <div id="winners-section">
-      <h2>🎉 ¡Tenemos a los ganadores! 🎉</h2>
-      <div id="winners-list"></div>
-      <br><br>
-      <button class="secondary" onclick="location.reload()">Hacer otro sorteo</button>
-    </div>
+    <button onclick="goToStep2()">Continuar →</button>
   </div>
 
-  <!-- ============ CÓDIGO FUENTE ============ -->
-  <div class="code-wrapper">
-    <div class="code-header">
-      <span class="dot red"></span>
-      <span class="dot yellow"></span>
-      <span class="dot green"></span>
-      <span class="code-title">sorteo.html</span>
-    </div>
-<pre><code><span class="cm">&lt;!-- Sorteo de Instagram --&gt;</span>
-<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="str">"container"</span><span class="tag">&gt;</span>
-  <span class="tag">&lt;h1&gt;</span>Sorteo de Instagram<span class="tag">&lt;/h1&gt;</span>
-  <span class="tag">&lt;textarea</span> <span class="attr">id</span>=<span class="str">"participants"</span><span class="tag">&gt;&lt;/textarea&gt;</span>
-  <span class="tag">&lt;button</span> <span class="attr">onclick</span>=<span class="str">"startDraw()"</span><span class="tag">&gt;</span>Elegir 3 Ganadores<span class="tag">&lt;/button&gt;</span>
-<span class="tag">&lt;/div&gt;</span>
+  <!-- ============ PASO 2: Placeholder (próximamente) ============ -->
+  <div id="step-2">
+    <div class="placeholder-card">
+      <h2>🎯 Publicación seleccionada</h2>
+      <p>Este es el enlace que se usará para el sorteo:</p>
+      <span class="link-preview" id="post-preview"></span>
 
-<span class="cm">// Función principal del sorteo</span>
-<span class="kw">function</span> <span class="num">startDraw</span>() {
-  <span class="kw">const</span> textArea = document.<span class="num">getElementById</span>(<span class="str">'participants'</span>).value;
-  <span class="kw">const</span> participants = textArea.<span class="num">split</span>(<span class="str">'\n'</span>).<span class="num">filter</span>(n =&gt; n.<span class="num">trim</span>() !== <span class="str">''</span>);
-  <span class="kw">if</span> (participants.length &lt; <span class="num">3</span>) <span class="kw">return</span> <span class="num">alert</span>(<span class="str">"Necesitas al menos 3 participantes."</span>);
-  <span class="cm">// ...resto de la lógica</span>
-}</code></pre>
+      <p class="info">
+        Aquí desarrollaremos la siguiente sección:<br>
+        carga de participantes, sorteo y resultados.
+      </p>
+
+      <button class="back-btn" onclick="goBack()">← Volver</button>
+    </div>
   </div>
 
   <script>
-    function dispararConfeti() {
-      const duration = 3000;
-      const end = Date.now() + duration;
-      const coloresInstagram = ['#405DE6','#5851DB','#833AB4','#C13584','#E1306C','#FD1D1D','#F56040','#F77737','#FCAF45','#FFDC80'];
+    const igInput = document.getElementById('ig-post');
 
-      (function frame() {
-        confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: coloresInstagram });
-        confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: coloresInstagram });
-        if (Date.now() < end) requestAnimationFrame(frame);
-      })();
-    }
+    function goToStep2() {
+      const url = igInput.value.trim();
 
-    function startDraw() {
-      const textArea = document.getElementById('participants').value;
-      const participants = textArea.split('\n').filter(name => name.trim() !== '');
-
-      if (participants.length < 3) {
-        alert("Necesitas al menos 3 participantes para el sorteo.");
+      // Validación simple
+      if (!url) {
+        alert("Por favor, pega el enlace de la publicación de Instagram.");
+        return;
+      }
+      if (!url.includes('instagram.com')) {
+        alert("El enlace no parece ser de Instagram. Verifícalo, por favor.");
         return;
       }
 
-      document.getElementById('setup-section').style.display = 'none';
-      document.getElementById('loader').style.display = 'block';
-      document.getElementById('loading-text').style.display = 'block';
+      // Guardamos el enlace para usarlo más adelante
+      sessionStorage.setItem('igPostUrl', url);
 
-      const tiempoDeSpeech = 15000;
+      // Mostramos el enlace en la segunda pantalla
+      document.getElementById('post-preview').innerText = url;
 
-      setTimeout(() => {
-        const shuffled = [...participants].sort(() => 0.5 - Math.random());
-        const winners = shuffled.slice(0, 3);
-
-        document.getElementById('loader').style.display = 'none';
-        document.getElementById('loading-text').style.display = 'none';
-
-        const winnersListDiv = document.getElementById('winners-list');
-        winnersListDiv.innerHTML = '';
-
-        winners.forEach((winner, index) => {
-          const div = document.createElement('div');
-          div.className = 'winner-name';
-          div.innerText = winner;
-          div.style.animationDelay = `${index * 0.3}s`;
-          winnersListDiv.appendChild(div);
-        });
-
-        document.getElementById('winners-section').style.display = 'block';
-        dispararConfeti();
-      }, tiempoDeSpeech);
+      // Cambiamos de pantalla
+      document.getElementById('step-1').style.display = 'none';
+      document.getElementById('step-2').style.display = 'block';
     }
+
+    function goBack() {
+      document.getElementById('step-2').style.display = 'none';
+      document.getElementById('step-1').style.display = 'block';
+    }
+
+    // Permitir "Enter" en el input para pasar al paso 2
+    igInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        e.preventDefault();
+        goToStep2();
+      }
+    });
   </script>
 </body>
 </html>
