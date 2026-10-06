@@ -1,487 +1,320 @@
-<html>
-
+<!DOCTYPE html>
+<html lang="es">
 <head>
-<meta http-equiv=Content-Type content="text/html; charset=windows-1252">
-<meta name=Generator content="Microsoft Word 15 (filtered)">
-<style>
-<!--
- /* Font Definitions */
- @font-face
-	{font-family:"Cambria Math";
-	panose-1:2 4 5 3 5 4 6 3 2 4;}
-@font-face
-	{font-family:Aptos;}
-@font-face
-	{font-family:"Segoe UI Emoji";
-	panose-1:2 11 5 2 4 2 4 2 2 3;}
- /* Style Definitions */
- p.MsoNormal, li.MsoNormal, div.MsoNormal
-	{margin-top:0cm;
-	margin-right:0cm;
-	margin-bottom:8.0pt;
-	margin-left:0cm;
-	line-height:115%;
-	font-size:12.0pt;
-	font-family:"Aptos",sans-serif;}
-.MsoChpDefault
-	{font-family:"Aptos",sans-serif;}
-.MsoPapDefault
-	{margin-bottom:8.0pt;
-	line-height:115%;}
-@page WordSection1
-	{size:612.0pt 792.0pt;
-	margin:70.85pt 3.0cm 70.85pt 3.0cm;}
-div.WordSection1
-	{page:WordSection1;}
--->
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sorteo de Instagram</title>
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+  <style>
+    :root {
+      --ig-gradient: linear-gradient(45deg, #405DE6, #5851DB, #833AB4, #C13584, #E1306C, #FD1D1D, #F56040, #F77737, #FCAF45, #FFDC80);
+      --ig-pink: #e1306c;
+      --ig-blue: #0095f6;
+      --ig-blue-hover: #1877f2;
+      --bg: #fafafa;
+      --card: #ffffff;
+      --text: #262626;
+      --muted: #8e8e8e;
+      --border: #dbdbdb;
+      --code-bg: #1e1e2e;
+      --code-text: #cdd6f4;
+      --code-keyword: #cba6f7;
+      --code-string: #a6e3a1;
+      --code-comment: #6c7086;
+      --code-tag: #89b4fa;
+      --code-attr: #f9e2af;
+    }
 
+    * { box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 40px 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* -------- Tarjeta principal del sorteo -------- */
+    .container {
+      background: var(--card);
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+      text-align: center;
+      width: 100%;
+      max-width: 600px;
+      position: relative;
+      z-index: 10;
+      border-top: 4px solid transparent;
+      border-image: var(--ig-gradient) 1;
+    }
+
+    h1, h2 {
+      margin-top: 0;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+    }
+
+    h1 {
+      font-size: 26px;
+      background: var(--ig-gradient);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    h2 { font-size: 22px; color: var(--text); }
+
+    p { color: var(--muted); line-height: 1.5; }
+
+    textarea {
+      width: 100%;
+      height: 150px;
+      padding: 14px;
+      border: 1.5px solid var(--border);
+      border-radius: 10px;
+      margin-bottom: 20px;
+      resize: vertical;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+      font-size: 15px;
+      color: var(--text);
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    textarea:focus {
+      outline: none;
+      border-color: var(--ig-pink);
+      box-shadow: 0 0 0 3px rgba(225, 48, 108, 0.15);
+    }
+
+    button {
+      background: var(--ig-blue);
+      color: white;
+      border: none;
+      padding: 12px 28px;
+      font-size: 16px;
+      font-weight: 600;
+      border-radius: 10px;
+      cursor: pointer;
+      transition: background-color 0.2s, transform 0.1s;
+    }
+
+    button:hover { background: var(--ig-blue-hover); }
+    button:active { transform: scale(0.98); }
+
+    button.secondary {
+      background: var(--border);
+      color: var(--text);
+    }
+    button.secondary:hover { background: #c7c7c7; }
+
+    /* -------- Loader -------- */
+    .loader {
+      border: 6px solid #f3f3f3;
+      border-top: 6px solid var(--ig-pink);
+      border-radius: 50%;
+      width: 60px;
+      height: 60px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+      display: none;
+    }
+
+    @keyframes spin {
+      0%   { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    #loading-text {
+      display: none;
+      font-size: 16px;
+      margin-top: 15px;
+      color: var(--muted);
+    }
+
+    /* -------- Resultados -------- */
+    #winners-section { display: none; }
+
+    .winner-name {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--ig-pink);
+      margin: 12px 0;
+      padding: 16px;
+      background: #fff0f5;
+      border-radius: 10px;
+      border-left: 4px solid var(--ig-pink);
+      animation: popIn 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+      opacity: 0;
+      transform: scale(0.8);
+    }
+
+    @keyframes popIn {
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* -------- Bloque para mostrar el código -------- */
+    .code-wrapper {
+      margin-top: 40px;
+      width: 100%;
+      max-width: 900px;
+      background: var(--code-bg);
+      border-radius: 14px;
+      overflow: hidden;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      font-family: 'Fira Code', 'Consolas', 'Menlo', monospace;
+    }
+
+    .code-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 12px 18px;
+      background: #181825;
+      border-bottom: 1px solid #313244;
+    }
+
+    .dot {
+      width: 12px; height: 12px; border-radius: 50%;
+    }
+    .dot.red    { background: #ff5f56; }
+    .dot.yellow { background: #ffbd2e; }
+    .dot.green  { background: #27c93f; }
+
+    .code-title {
+      margin-left: 12px;
+      color: #a6adc8;
+      font-size: 13px;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    pre {
+      margin: 0;
+      padding: 20px 24px;
+      overflow-x: auto;
+      color: var(--code-text);
+      font-size: 13.5px;
+      line-height: 1.6;
+      tab-size: 2;
+    }
+
+    /* Resaltado de sintaxis básico */
+    .kw  { color: var(--code-keyword); }
+    .str { color: var(--code-string); }
+    .cm  { color: var(--code-comment); font-style: italic; }
+    .tag { color: var(--code-tag); }
+    .attr{ color: var(--code-attr); }
+    .num { color: #fab387; }
+
+    @media (max-width: 600px) {
+      .container { padding: 25px; }
+      pre { font-size: 12px; padding: 16px; }
+    }
+  </style>
 </head>
-
-<body lang=ES-VE style='word-wrap:break-word'>
-
-<div class=WordSection1>
-
-<p class=MsoNormal><span lang=EN-US>&lt;!DOCTYPE html&gt;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>&lt;html lang=&quot;es&quot;&gt;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>&lt;head&gt;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>    &lt;meta charset=&quot;UTF-8&quot;&gt;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>    &lt;meta name=&quot;viewport&quot;
-content=&quot;width=device-width, initial-scale=1.0&quot;&gt;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>    &lt;title&gt;Sorteo de
-Instagram&lt;/title&gt;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>    </span>&lt;!-- Librería para el confeti
---&gt;</p>
-
-<p class=MsoNormal>    &lt;script
-src=&quot;https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js&quot;&gt;&lt;/script&gt;</p>
-
-<p class=MsoNormal>    <span lang=EN-US>&lt;style&gt;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>        body {</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            font-family: 'Segoe UI',
-Tahoma, Geneva, Verdana, sans-serif;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            background-color: #fafafa;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            color: #262626;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            display: flex;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            flex-direction: column;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            align-items: center;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            justify-content: center;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            min-height: 100vh;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            </span>margin: 0;</p>
-
-<p class=MsoNormal>            overflow-x: hidden; /* Evita que la pantalla se
-mueva por el confeti */</p>
-
-<p class=MsoNormal>        <span lang=EN-US>}</span></p>
-
-<p class=MsoNormal><span lang=EN-US>        .container {</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            background: white;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            padding: 40px;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            border-radius: 12px;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            box-shadow: 0 4px 12px
-rgba(0,0,0,0.1);</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            text-align: center;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            width: 80%;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            max-width: 600px;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            position: relative;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            z-index: 10;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>        }</span></p>
-
-<p class=MsoNormal><span lang=EN-US>        textarea {</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            width: 100%;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            height: 150px;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            padding: 10px;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            border: 1px solid #dbdbdb;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            border-radius: 8px;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            margin-bottom: 20px;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            resize: none;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            box-sizing: border-box;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>        }</span></p>
-
-<p class=MsoNormal><span lang=EN-US>        button {</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            background-color: #0095f6;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            color: white;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            border: none;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            padding: 12px 24px;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            font-size: 16px;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            font-weight: bold;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            border-radius: 8px;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            cursor: pointer;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            transition: background-color
-0.2s;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>        }</span></p>
-
-<p class=MsoNormal><span lang=EN-US>        button:hover { background-color:
-#1877f2; }</span></p>
-
-<p class=MsoNormal><span lang=EN-US>        </span></p>
-
-<p class=MsoNormal><span lang=EN-US>        </span>/* Animación de carga */</p>
-
-<p class=MsoNormal>        .loader {</p>
-
-<p class=MsoNormal>            border: 6px solid #f3f3f3;</p>
-
-<p class=MsoNormal>            <span lang=EN-US>border-top: 6px solid #e1306c;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            border-radius: 50%;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            width: 60px;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            height: 60px;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            animation: spin 1s linear
-infinite;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            margin: 20px auto;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            display: none;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>        }</span></p>
-
-<p class=MsoNormal><span lang=EN-US>        @keyframes spin {</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            0% { transform: rotate(0deg); }</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            100% { transform:
-rotate(360deg); }</span></p>
-
-<p class=MsoNormal><span lang=EN-US>        }</span></p>
-
-<p class=MsoNormal><span lang=EN-US>        </span></p>
-
-<p class=MsoNormal><span lang=EN-US>        #loading-text { display: none;
-font-size: 18px; margin-top: 15px; color: #8e8e8e; }</span></p>
-
-<p class=MsoNormal><span lang=EN-US>        #winners-section { display: none; }</span></p>
-
-<p class=MsoNormal><span lang=EN-US>        .winner-name {</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            font-size: 24px;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            font-weight: bold;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            color: #e1306c;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            margin: 10px 0;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            padding: 15px;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            background: #fff0f5;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            border-radius: 8px;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            animation: popIn 0.5s
-cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            </span>opacity: 0;</p>
-
-<p class=MsoNormal>            transform: scale(0.8);</p>
-
-<p class=MsoNormal>        }</p>
-
-<p class=MsoNormal>&nbsp;</p>
-
-<p class=MsoNormal>        /* Animación para que los nombres aparezcan saltando
-*/</p>
-
-<p class=MsoNormal>        <span lang=EN-US>@keyframes popIn {</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            to { opacity: 1; transform:
-scale(1); }</span></p>
-
-<p class=MsoNormal><span lang=EN-US>        }</span></p>
-
-<p class=MsoNormal><span lang=EN-US>    &lt;/style&gt;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>&lt;/head&gt;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>&lt;body&gt;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>&lt;div class=&quot;container&quot;
-id=&quot;main-container&quot;&gt;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>    &lt;div
-id=&quot;setup-section&quot;&gt;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>        &lt;h2&gt;Sorteo de
-Instagram&lt;/h2&gt;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>        </span>&lt;p&gt;Pega aquí la lista
-de usuarios (uno por línea):&lt;/p&gt;</p>
-
-<p class=MsoNormal>        &lt;textarea id=&quot;participants&quot;
-placeholder=&quot;@usuario1&amp;#10;@usuario2&amp;#10;@usuario3&quot;&gt;&lt;/textarea&gt;</p>
-
-<p class=MsoNormal>        <span lang=EN-US>&lt;br&gt;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>        &lt;button
-onclick=&quot;startDraw()&quot;&gt;Elegir 3 Ganadores&lt;/button&gt;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>    </span>&lt;/div&gt;</p>
-
-<p class=MsoNormal>&nbsp;</p>
-
-<p class=MsoNormal>    &lt;!-- Sección de Carga para tu Speech --&gt;</p>
-
-<p class=MsoNormal>    <span lang=EN-US>&lt;div class=&quot;loader&quot;
-id=&quot;loader&quot;&gt;&lt;/div&gt;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>    </span>&lt;p
-id=&quot;loading-text&quot;&gt;Verificando participaciones y mezclando...
-¡Mucha suerte!&lt;/p&gt;</p>
-
-<p class=MsoNormal>&nbsp;</p>
-
-<p class=MsoNormal>    &lt;!-- Sección de Resultados --&gt;</p>
-
-<p class=MsoNormal>    &lt;div id=&quot;winners-section&quot;&gt;</p>
-
-<p class=MsoNormal>        &lt;h2&gt;<span style='font-family:"Segoe UI Emoji",sans-serif'>&#127881;</span>
-¡Tenemos a los ganadores! <span style='font-family:"Segoe UI Emoji",sans-serif'>&#127881;</span><span
-lang=EN-US>&lt;/h2&gt;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>        &lt;div
-id=&quot;winners-list&quot;&gt;&lt;/div&gt;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>        &lt;br&gt;&lt;br&gt;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>        &lt;button
-onclick=&quot;location.reload()&quot; style=&quot;background-color: #dbdbdb;
-color: black;&quot;&gt;Hacer otro sorteo&lt;/button&gt;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>    </span>&lt;/div&gt;</p>
-
-<p class=MsoNormal>&lt;/div&gt;</p>
-
-<p class=MsoNormal>&nbsp;</p>
-
-<p class=MsoNormal>&lt;script&gt;</p>
-
-<p class=MsoNormal>    // Función para lanzar el confeti</p>
-
-<p class=MsoNormal>    function dispararConfeti() {</p>
-
-<p class=MsoNormal>        var duration = 3 * 1000; // El confeti durará 3
-segundos</p>
-
-<p class=MsoNormal>        <span lang=EN-US>var end = Date.now() + duration;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>        </span>(function frame() {</p>
-
-<p class=MsoNormal>            // Colores de la marca de Instagram</p>
-
-<p class=MsoNormal>            var coloresInstagram = ['#405DE6', '#5851DB',
-'#833AB4', '#C13584', '#E1306C', '#FD1D1D', '#F56040', '#F77737', '#FCAF45',
-'#FFDC80'];</p>
-
-<p class=MsoNormal>&nbsp;</p>
-
-<p class=MsoNormal>            <span lang=EN-US>confetti({</span></p>
-
-<p class=MsoNormal><span lang=EN-US>                particleCount: 5,</span></p>
-
-<p class=MsoNormal><span lang=EN-US>                angle: 60,</span></p>
-
-<p class=MsoNormal><span lang=EN-US>                spread: 55,</span></p>
-
-<p class=MsoNormal><span lang=EN-US>                origin: { x: 0 },</span></p>
-
-<p class=MsoNormal><span lang=EN-US>                colors: coloresInstagram</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            });</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            confetti({</span></p>
-
-<p class=MsoNormal><span lang=EN-US>                particleCount: 5,</span></p>
-
-<p class=MsoNormal><span lang=EN-US>                angle: 120,</span></p>
-
-<p class=MsoNormal><span lang=EN-US>                spread: 55,</span></p>
-
-<p class=MsoNormal><span lang=EN-US>                origin: { x: 1 },</span></p>
-
-<p class=MsoNormal><span lang=EN-US>                colors: coloresInstagram</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            });</span></p>
-
-<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            if (Date.now() &lt; end) {</span></p>
-
-<p class=MsoNormal><span lang=EN-US>               
-requestAnimationFrame(frame);</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            }</span></p>
-
-<p class=MsoNormal><span lang=EN-US>        }());</span></p>
-
-<p class=MsoNormal><span lang=EN-US>    }</span></p>
-
-<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>    function startDraw() {</span></p>
-
-<p class=MsoNormal><span lang=EN-US>        const textArea =
-document.getElementById('participants').value;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>        const participants =
-textArea.split('\n').filter(name =&gt; name.trim() !== </span>'');</p>
-
-<p class=MsoNormal>&nbsp;</p>
-
-<p class=MsoNormal>        if (participants.length &lt; 3) {</p>
-
-<p class=MsoNormal>            alert(&quot;Necesitas al menos 3 participantes
-para el sorteo.&quot;);</p>
-
-<p class=MsoNormal>            <span lang=EN-US>return;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>        }</span></p>
-
-<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>       
-document.getElementById('setup-section').style.display = 'none';</span></p>
-
-<p class=MsoNormal><span lang=EN-US>       
-document.getElementById('loader').style.display = 'block';</span></p>
-
-<p class=MsoNormal><span lang=EN-US>       
-document.getElementById('loading-text').style.display = 'block';</span></p>
-
-<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>        </span>// TIEMPO DE ESPERA (15000 =
-15 segundos)</p>
-
-<p class=MsoNormal>        const tiempoDeSpeech = 15000; </p>
-
-<p class=MsoNormal>&nbsp;</p>
-
-<p class=MsoNormal>        <span lang=EN-US>setTimeout(() =&gt; {</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            const shuffled =
-participants.sort(() =&gt; 0.5 - Math.random());</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            const winners =
-shuffled.slice(0, 3);</span></p>
-
-<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>           
-document.getElementById('loader').style.display = 'none';</span></p>
-
-<p class=MsoNormal><span lang=EN-US>           
-document.getElementById('loading-text').style.display = 'none';</span></p>
-
-<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            const winnersListDiv =
-document.getElementById('winners-list');</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            winnersListDiv.innerHTML = '';</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            </span></p>
-
-<p class=MsoNormal><span lang=EN-US>            winners.forEach((winner, index)
-=&gt; {</span></p>
-
-<p class=MsoNormal><span lang=EN-US>                const div =
-document.createElement('div');</span></p>
-
-<p class=MsoNormal><span lang=EN-US>                div.className =
-'winner-name';</span></p>
-
-<p class=MsoNormal><span lang=EN-US>                div.innerText = winner;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>                </span>// Pequeño retraso
-entre cada nombre para que no aparezcan de golpe</p>
-
-<p class=MsoNormal>                <span lang=EN-US>div.style.animationDelay =
-`${index * 0.3}s`;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>               
-winnersListDiv.appendChild(div);</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            });</span></p>
-
-<p class=MsoNormal><span lang=EN-US>&nbsp;</span></p>
-
-<p class=MsoNormal><span lang=EN-US>           
-document.getElementById('winners-section').style.display = 'block';</span></p>
-
-<p class=MsoNormal><span lang=EN-US>            </span></p>
-
-<p class=MsoNormal><span lang=EN-US>            </span>// ¡Lanzar el confeti!</p>
-
-<p class=MsoNormal>            dispararConfeti();</p>
-
-<p class=MsoNormal>&nbsp;</p>
-
-<p class=MsoNormal>        }, tiempoDeSpeech);</p>
-
-<p class=MsoNormal>    }</p>
-
-<p class=MsoNormal>&lt;/script&gt;</p>
-
-<p class=MsoNormal>&nbsp;</p>
-
-<p class=MsoNormal>&lt;/body&gt;</p>
-
-<p class=MsoNormal>&lt;/html&gt;</p>
-
-</div>
-
+<body>
+
+  <!-- ============ SORTEO ============ -->
+  <div class="container" id="main-container">
+    <div id="setup-section">
+      <h1>Sorteo de Instagram</h1>
+      <p>Pega aquí la lista de usuarios (uno por línea):</p>
+      <textarea id="participants" placeholder="@usuario1&#10;@usuario2&#10;@usuario3"></textarea>
+      <br>
+      <button onclick="startDraw()">Elegir 3 Ganadores</button>
+    </div>
+
+    <div class="loader" id="loader"></div>
+    <p id="loading-text">Verificando participaciones y mezclando... ¡Mucha suerte!</p>
+
+    <div id="winners-section">
+      <h2>🎉 ¡Tenemos a los ganadores! 🎉</h2>
+      <div id="winners-list"></div>
+      <br><br>
+      <button class="secondary" onclick="location.reload()">Hacer otro sorteo</button>
+    </div>
+  </div>
+
+  <!-- ============ CÓDIGO FUENTE ============ -->
+  <div class="code-wrapper">
+    <div class="code-header">
+      <span class="dot red"></span>
+      <span class="dot yellow"></span>
+      <span class="dot green"></span>
+      <span class="code-title">sorteo.html</span>
+    </div>
+<pre><code><span class="cm">&lt;!-- Sorteo de Instagram --&gt;</span>
+<span class="tag">&lt;div</span> <span class="attr">class</span>=<span class="str">"container"</span><span class="tag">&gt;</span>
+  <span class="tag">&lt;h1&gt;</span>Sorteo de Instagram<span class="tag">&lt;/h1&gt;</span>
+  <span class="tag">&lt;textarea</span> <span class="attr">id</span>=<span class="str">"participants"</span><span class="tag">&gt;&lt;/textarea&gt;</span>
+  <span class="tag">&lt;button</span> <span class="attr">onclick</span>=<span class="str">"startDraw()"</span><span class="tag">&gt;</span>Elegir 3 Ganadores<span class="tag">&lt;/button&gt;</span>
+<span class="tag">&lt;/div&gt;</span>
+
+<span class="cm">// Función principal del sorteo</span>
+<span class="kw">function</span> <span class="num">startDraw</span>() {
+  <span class="kw">const</span> textArea = document.<span class="num">getElementById</span>(<span class="str">'participants'</span>).value;
+  <span class="kw">const</span> participants = textArea.<span class="num">split</span>(<span class="str">'\n'</span>).<span class="num">filter</span>(n =&gt; n.<span class="num">trim</span>() !== <span class="str">''</span>);
+  <span class="kw">if</span> (participants.length &lt; <span class="num">3</span>) <span class="kw">return</span> <span class="num">alert</span>(<span class="str">"Necesitas al menos 3 participantes."</span>);
+  <span class="cm">// ...resto de la lógica</span>
+}</code></pre>
+  </div>
+
+  <script>
+    function dispararConfeti() {
+      const duration = 3000;
+      const end = Date.now() + duration;
+      const coloresInstagram = ['#405DE6','#5851DB','#833AB4','#C13584','#E1306C','#FD1D1D','#F56040','#F77737','#FCAF45','#FFDC80'];
+
+      (function frame() {
+        confetti({ particleCount: 5, angle: 60, spread: 55, origin: { x: 0 }, colors: coloresInstagram });
+        confetti({ particleCount: 5, angle: 120, spread: 55, origin: { x: 1 }, colors: coloresInstagram });
+        if (Date.now() < end) requestAnimationFrame(frame);
+      })();
+    }
+
+    function startDraw() {
+      const textArea = document.getElementById('participants').value;
+      const participants = textArea.split('\n').filter(name => name.trim() !== '');
+
+      if (participants.length < 3) {
+        alert("Necesitas al menos 3 participantes para el sorteo.");
+        return;
+      }
+
+      document.getElementById('setup-section').style.display = 'none';
+      document.getElementById('loader').style.display = 'block';
+      document.getElementById('loading-text').style.display = 'block';
+
+      const tiempoDeSpeech = 15000;
+
+      setTimeout(() => {
+        const shuffled = [...participants].sort(() => 0.5 - Math.random());
+        const winners = shuffled.slice(0, 3);
+
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('loading-text').style.display = 'none';
+
+        const winnersListDiv = document.getElementById('winners-list');
+        winnersListDiv.innerHTML = '';
+
+        winners.forEach((winner, index) => {
+          const div = document.createElement('div');
+          div.className = 'winner-name';
+          div.innerText = winner;
+          div.style.animationDelay = `${index * 0.3}s`;
+          winnersListDiv.appendChild(div);
+        });
+
+        document.getElementById('winners-section').style.display = 'block';
+        dispararConfeti();
+      }, tiempoDeSpeech);
+    }
+  </script>
 </body>
-
 </html>
